@@ -15,7 +15,7 @@ st.set_page_config(
         "Get Help": "https://google.com", # 添加"获取帮助"菜单项，点击后跳转到指定URL
     }
 )
-st.title("🤖 AI智能伴侣")
+st.title("🤖 v的智能伴侣")
 st.logo("robot.png")
 prompt = st.chat_input("请输入你的问题")
 # Initialize the OpenAI client
