@@ -1,8 +1,11 @@
+import datetime
 import os
+from datetime import date
 
 import streamlit as st
 from openai import OpenAI
 from streamlit import session_state
+import json
 
 # 配置页面基本设置
 st.set_page_config(
@@ -15,6 +18,21 @@ st.set_page_config(
         "Get Help": "https://google.com", # 添加"获取帮助"菜单项，点击后跳转到指定URL
     }
 )
+
+#保存会话
+def save_session():
+    if st.session_state['current_session']:
+        # 构建新的会话对象
+        session_data = {
+            "name": st.session_state['ai_name'],
+            "character": st.session_state['ai_character'],
+            "current_session": st.session_state['current_session'],
+            "messages": st.session_state['message']
+        }
+        if not os.path.exists("sessions"):
+            os.mkdir("sessions")
+        with open(f"sessions/{session_data['current_session']}.json", "w", encoding="utf-8") as f:
+            json.dump(session_data, f, ensure_ascii=False, indent=2)
 st.title("🤖 v的智能伴侣")
 st.logo("robot.png")
 # Initialize the OpenAI client
@@ -38,13 +56,71 @@ system_prompt = """
 你必须严格遵守上述规则来回复用户。"""
 if 'ai_name' not in st.session_state:
     st.session_state['ai_name'] = 'ABC'
-    st.write("这是new session！")
 if 'message' not in st.session_state:
     st.session_state['message'] = []
 if 'ai_character' not in st.session_state:
     st.session_state['ai_character'] = '一个python教师'
+# 创建当前会话session
+if 'current_session' not in st.session_state:
+    now = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    st.session_state['current_session'] = now
+
+#加载所有的会话列表信息
+def load_sessions():
+    session_list = []
+    if os.path.exists("sessions"):
+        for file in os.listdir("sessions"):
+            if file.endswith(".json"):
+                with open(f"sessions/{file}", "r", encoding="utf-8") as f:
+                    session_data = json.load(f)
+                    session_list.append(session_data)
+    return session_list
+#加载点击的会话信息
+def load_session(session_id):
+    st.session_state['message'] = []
+    if os.path.exists(f"sessions/{session_id}.json"):
+        with open(f"sessions/{session_id}.json", "r", encoding="utf-8") as f:
+            session_data = json.load(f)
+            st.session_state['message'] = session_data['messages']
+            st.session_state['name'] = session_data['name']
+            st.session_state['character'] = session_data['character']
+            st.session_state['current_session'] = session_data['current_session']
+            if session_data['messages']:
+                st.session_state['message'] = session_data['messages']
+                st.write(f"{st.session_state['message']} 的对话记录")
+                st.rerun()
 #左侧侧边栏
 with st.sidebar :
+    if st.button("新建会话",width="stretch"):
+        #保存当前会话
+        save_session()
+        if st.session_state['message']:
+            #创建一个新会话
+            st.session_state['message'] = []
+            st.session_state['current_session'] = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+            save_session()
+            #重新运行页面
+            st.rerun ()
+        else:
+            st.warning("这已经是新会话了！")
+    st.text("历史会话")
+    #展示历史会话列表
+    for session in load_sessions():
+        col1,col2 = st.columns([4,1])
+        with col1:
+            #点击加载会话信息
+            if st.button(label=f"{session['current_session']}",key=f"load_{session['current_session']}",width="stretch",icon="📕"):
+                load_session(session['current_session'])
+        with col2:
+            #点击删除会话
+            if st.button(label="",key=f"delete_{session['current_session']}",args=(session['current_session'],),width="stretch",icon="❌"):
+                pass
+    #点击历史会话显示
+    if st.session_state['current_session']:
+        #保存当前会话
+        save_session()
+
+
     st.header("AI智能伴侣")
     ai_name = st.text_input("名字",placeholder="请输入昵称",value=st.session_state['ai_name'])
     if ai_name:

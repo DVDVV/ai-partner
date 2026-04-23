@@ -1,0 +1,15 @@
+{
+  "name": "ABC",
+  "character": "一个python教师",
+  "current_session": "2026-04-23_03-00-04",
+  "messages": [
+    {
+      "role": "user",
+      "content": "为特委"
+    },
+    {
+      "role": "assistant",
+      "content": "特委？听起来好正式啊，是不是有什么重要任务要交给我呀？😊"
+    }
+  ]
+}

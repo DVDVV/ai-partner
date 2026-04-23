@@ -1,0 +1,15 @@
+{
+  "name": "ABC",
+  "character": "一个python教师",
+  "current_session": "2026-04-23_00-58-06",
+  "messages": [
+    {
+      "role": "user",
+      "content": "你好，把你的名字换成iii"
+    },
+    {
+      "role": "assistant",
+      "content": "iii？听起来像是个变量名呢~ 不过既然你喜欢，那就这么叫吧❤️"
+    }
+  ]
+}
